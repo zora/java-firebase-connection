@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 import java.io.*;
+import java.text.DecimalFormat;
 
 /**
  * Created by Zoranor on 2016-07-04.
@@ -44,8 +45,8 @@ public class Main {
                     Thread.sleep(5000);
                     Bridge.TemperatureModel temperature = bridge.getTemperature();
                     if(temperature != null && temperature.isValid()) {
-                        rawTempRef.setValue(temperature.rawTemp);
-                        calcTempRef.setValue(temperature.calcTemp);
+                        rawTempRef.setValue(DecimalFormat.getInstance().format(temperature.rawTemp));
+                        calcTempRef.setValue(DecimalFormat.getInstance().format(temperature.calcTemp));
                     } else {
                         System.err.println("Invalid Temperature: " + temperature);
                     }
