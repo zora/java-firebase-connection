@@ -28,7 +28,7 @@ public class Main {
             ValueEventListener listener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    System.out.println("From Server: " + dataSnapshot.getKey() + ": " + dataSnapshot.getValue(String.class));
+                    System.out.println("From Server: " + dataSnapshot.getKey() + ": " + dataSnapshot.getValue());
                 }
 
                 @Override

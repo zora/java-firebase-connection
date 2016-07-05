@@ -23,7 +23,7 @@ public class Bridge {
 
     public TemperatureModel getTemperature() {
         try {
-            Process p = Runtime.getRuntime().exec("python ../temp.py");
+            Process p = Runtime.getRuntime().exec("python3 ../temp.py");
             return gson.fromJson(new JsonReader(new InputStreamReader(p.getInputStream())), TemperatureModel.class);
         } catch (IOException e) {
             e.printStackTrace();
