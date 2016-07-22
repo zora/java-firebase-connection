@@ -1,66 +1,56 @@
 {
-  "devices": [
-    {
-      "name": "Device1",
+  "devices": {
+    "device1": {
+      "name": "device1",
       "location": "Livingroom",
       "sensorIDs": [
         "temp1",
         "humidity1"
       ],
       "deviceStats": {
-        "cpu-usage": "50%",
-        "memory-usage": "20%",
+        "cpuUsage": "50%",
+        "memoryUsage": "20%",
         "uptime": "12d",
-        "log-id": "log1"
+        "logID": "log1"
       }
     }
-  ],
-  "sensors": [
-    {
+  },
+  "sensors": {
+    "temp1": {
       "id": "temp1",
       "type": "temperature",
-      "active": "true",
-      "currentValue": "20.50",
-      "timestamp": "1468863957"
+      "active": true
     },
-    {
-      "id" : "humidity1",
+    "humidity1": {
+      "id": "humidity1",
       "type": "humidity",
-      "active": "true",
-      "currentValue": "50.02",
-      "timestamp": "1468863957"
+      "active": true
     }
-  ],
-  "deviceLogs": [
-    {
-      "id": "log1",
+  },
+  "deviceLogs": {
+    "device1Log": {
+      "id": "device1Log",
       "logs": [
         {
-          "timestamp": "1468863957",
+          "timestamp": 1468863957,
           "level": "debug",
           "data": "Log Started for Device1"
         }
       ]
     }
-  ],
-  "sensorData" : [
-    {
-      "sensor" : "temp1",
-      "values" : [
-        {
-          "timestamp" : "1468863957",
-          "value" : "20.50"
-        }  
-      ]
+  },
+  "sensorData": {
+    "temp1": {
+      "asdkf": {
+        "timestamp": 1468863957,
+        "value": 20.50
+      }
     },
-    {
-      "sensor" : "humidity1",
-      "values" : [
-        {
-          "timestamp" : "1468863957",
-          "value" : "50.02"
-        }  
-      ]
+    "humidity1": {
+      "askd": {
+        "timestamp": 1468863957,
+        "value": 50.02
+      }
     }
-  ]
+  }
 }
