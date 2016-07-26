@@ -9,7 +9,7 @@ import java.util.Observer;
 /**
  * Created by Tim on 2016-07-22.
  */
-public class TemperatureManager extends AbstractManager implements Observer {
+public class TemperatureManager extends AbstractSensorManager implements Observer {
 
     public TemperatureManager(FirebaseBridge firebaseBridge, IOBridge ioBridge) {
         super(firebaseBridge, ioBridge);

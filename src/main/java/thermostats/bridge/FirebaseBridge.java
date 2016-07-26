@@ -3,10 +3,7 @@ package thermostats.bridge;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.database.*;
-import thermostats.model.DeviceModel;
-import thermostats.model.SensorDataModel;
-import thermostats.model.SensorEventModel;
-import thermostats.model.SensorModel;
+import thermostats.model.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -108,6 +105,12 @@ public class FirebaseBridge extends Observable {
 
         long timestamp = System.currentTimeMillis();
         ref.child(eventKey).setValue(new SensorEventModel(timestamp, freshData.value));
+    }
+
+    public void publishLogCall(String tag, LogEventModel logEvent) {
+        DatabaseReference ref = mDeviceLogsReference.child(tag);
+        String eventKey = ref.push().getKey();
+        ref.child(eventKey).setValue(logEvent);
     }
 
     /*

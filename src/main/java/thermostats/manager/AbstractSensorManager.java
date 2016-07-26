@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Tim on 2016-07-22.
  */
-public abstract class AbstractManager implements Observer {
+public abstract class AbstractSensorManager implements Observer {
 
     private static final long INIT_DELAY = 2000;
     private static final long POLL_PERIOD = 5000;
@@ -26,7 +26,7 @@ public abstract class AbstractManager implements Observer {
     private final Map<String, SensorModel> mSensorSnapshots;
     private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(1);
 
-    public AbstractManager(FirebaseBridge firebaseBridge, IOBridge ioBridge) {
+    public AbstractSensorManager(FirebaseBridge firebaseBridge, IOBridge ioBridge) {
         mFirebaseBridge = firebaseBridge;
         mIOBridge = ioBridge;
         mSensorSnapshots = new HashMap<>();

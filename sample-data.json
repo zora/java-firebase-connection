@@ -2,17 +2,18 @@
   "devices": {
     "device1": {
       "name": "device1",
-      "location": "Livingroom",
+      "location": "LivingRoom",
       "sensorIDs": [
         "temp1",
         "humidity1"
-      ],
-      "deviceStats": {
-        "cpuUsage": "50%",
-        "memoryUsage": "20%",
-        "uptime": "12d",
-        "logID": "log1"
-      }
+      ]
+    }
+  },
+  "deviceStatistics": {
+    "device1": {
+      "cpuUsage": "50%",
+      "memoryUsage": "20%",
+      "uptime": "12d"
     }
   },
   "sensors": {
@@ -27,16 +28,13 @@
       "active": true
     }
   },
-  "deviceLogs": {
-    "device1Log": {
-      "id": "device1Log",
-      "logs": [
-        {
-          "timestamp": 1468863957,
-          "level": "debug",
-          "data": "Log Started for Device1"
-        }
-      ]
+  "logs": {
+    "device1": {
+      "dfgkl": {
+        "timestamp": 1468863957,
+        "level": 5,
+        "data": "Log Started for Device1"
+      }
     }
   },
   "sensorData": {

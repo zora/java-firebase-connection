@@ -1,5 +1,6 @@
 package thermostats.base;
 
+import thermostats.manager.HumidityManager;
 import thermostats.manager.TemperatureManager;
 import thermostats.bridge.FirebaseBridge;
 import thermostats.bridge.IOBridge;
@@ -15,8 +16,15 @@ public class Main {
         FirebaseBridge firebaseBridge = new FirebaseBridge();
         firebaseBridge.initialize();
 
+        Log.initialize(firebaseBridge);
+        Log.i("main", "Application Started.");
+
         IOBridge ioBridge = new MockIOBridge();
         TemperatureManager temperatureManager = new TemperatureManager(firebaseBridge, ioBridge);
         temperatureManager.initialize();
+        HumidityManager humidityManager = new HumidityManager(firebaseBridge, ioBridge);
+        humidityManager.initialize();
+
+        Log.i("main", "Sensors initialized.");
     }
 }
