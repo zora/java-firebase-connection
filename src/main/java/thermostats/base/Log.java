@@ -8,47 +8,66 @@ import thermostats.model.LogEventModel;
  */
 public class Log {
 
-    public final static int FATAL_INT = 50000;
-    public final static int ERROR_INT = 40000;
-    public final static int WARN_INT  = 30000;
-    public final static int INFO_INT  = 20000;
-    public final static int DEBUG_INT = 10000;
-    public static final int TRACE_INT = 5000;
+    public enum LogLevel {
+        TRACE(5000),
+        DEBUG(10000),
+        INFO(20000),
+        WARN(30000),
+        ERROR(40000),
+        FATAL(50000);
 
+        public final int value;
+
+        LogLevel(int value) {
+            this.value = value;
+        }
+
+        public static LogLevel fromIdentifier(int value) {
+            for (LogLevel lvl : values()) {
+                if (value == lvl.value) {
+                    return lvl;
+                }
+            }
+            return null;
+        }
+    }
 
     private static FirebaseBridge mBridge;
+    private static LogLevel mLogLevel = LogLevel.DEBUG;
+    public static final String DEFAULT_TAG = "main";
 
     public static void initialize(FirebaseBridge bridge) {
         mBridge = bridge;
     }
 
     public static void t(String tag, String message) {
-        log(TRACE_INT, tag, message);
+        log(LogLevel.TRACE, tag, message);
     }
 
     public static void d(String tag, String message) {
-        log(DEBUG_INT, tag, message);
+        log(LogLevel.DEBUG, tag, message);
     }
 
     public static void i(String tag, String message) {
-        log(INFO_INT, tag, message);
+        log(LogLevel.INFO, tag, message);
     }
 
     public static void w(String tag, String message) {
-        log(WARN_INT, tag, message);
+        log(LogLevel.WARN, tag, message);
     }
 
     public static void e(String tag, String message) {
-        log(ERROR_INT, tag, message);
+        log(LogLevel.ERROR, tag, message);
     }
 
     public static void f(String tag, String message) {
-        log(FATAL_INT, tag, message);
+        log(LogLevel.FATAL, tag, message);
     }
 
-    private static void log(int level, String tag, String message) {
-        if(mBridge != null && tag != null && !tag.isEmpty() && message != null && !message.isEmpty()) {
-            mBridge.publishLogCall(tag, new LogEventModel(System.currentTimeMillis(), level, message));
+    private static void log(LogLevel level, String tag, String message) {
+        if (mBridge != null && tag != null && !tag.isEmpty() && message != null && !message.isEmpty()) {
+            System.out.println(level.name() + ": " + tag + " - " + message);
+            mBridge.publishLogCall(tag, new LogEventModel(System.currentTimeMillis(), level.value, message));
         }
     }
 }

@@ -1,8 +1,10 @@
 package thermostats.manager;
 
+import thermostats.base.Log;
 import thermostats.bridge.FirebaseBridge;
 import thermostats.bridge.IOBridge;
 import thermostats.model.SensorDataModel;
+import thermostats.model.SensorEventModel;
 import thermostats.model.SensorModel;
 
 import java.util.HashMap;
@@ -19,29 +21,54 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractSensorManager implements Observer {
 
     private static final long INIT_DELAY = 2000;
-    private static final long POLL_PERIOD = 5000;
+    private static final long POLL_PERIOD = 15000;
 
     private FirebaseBridge mFirebaseBridge;
     private IOBridge mIOBridge;
-    private final Map<String, SensorModel> mSensorSnapshots;
+    private final Map<String, SensorModel> mManagedSensors;
     private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(1);
 
     public AbstractSensorManager(FirebaseBridge firebaseBridge, IOBridge ioBridge) {
         mFirebaseBridge = firebaseBridge;
         mIOBridge = ioBridge;
-        mSensorSnapshots = new HashMap<>();
+        mManagedSensors = new HashMap<>();
     }
 
     public void initialize() {
-        mFirebaseBridge.addObserver(this);
+        mFirebaseBridge.addSensorChangeListener(new FirebaseBridge.SensorChangeListener() {
+            @Override
+            public void onSensorAdded(FirebaseBridge.Snapshot<SensorModel> sensorSnapshot) {
+                SensorModel sensor = sensorSnapshot.getSnapshot();
+                if(sensor.type == getSensorType()) {
+                    if(!mManagedSensors.containsKey(sensor.id)){
+                        mManagedSensors.put(sensor.id, sensor);
+                        mFirebaseBridge.addSensorEventListener(sensor.id, new FirebaseBridge.SensorEventListener() {
+                            @Override
+                            public void onSensorEventReceived(String sensorID, SensorEventModel sensorEvent) {
+                                Log.d(Log.DEFAULT_TAG, "Event Received for ID: " + sensorID + " - " + sensorEvent);
+                            }
+                        });
+                    }
+
+                    sensorUpdated(sensor);
+                    sensorSnapshot.addObserver(AbstractSensorManager.this);
+
+                }
+            }
+
+            @Override
+            public void onSensorRemoved(String sensorID) {
+                mManagedSensors.remove(sensorID);
+            }
+        });
 
         mScheduler.scheduleAtFixedRate(() -> {
-            synchronized (mSensorSnapshots) {
-                for (SensorModel model : mSensorSnapshots.values()) {
+            synchronized (mManagedSensors) {
+                for (SensorModel model : mManagedSensors.values()) {
                     if(model.active) {
                         SensorDataModel freshData = mIOBridge.getSensorData(model);
                         if(freshData != null && freshData.isValid()) {
-                            receivedNewSensorData(model, freshData);
+                            receivedDataFromSensor(model, freshData);
                         } else {
                             // TODO: Add error log for invalid sensor data.
                         }
@@ -55,28 +82,24 @@ public abstract class AbstractSensorManager implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof SensorModel) {
-            SensorModel updated = (SensorModel) arg;
+            SensorModel sensor = (SensorModel) arg;
+            if (sensor.type == getSensorType()) {
+                sensorUpdated(sensor);
+            } else {
 
-            if (updated.type == getSensorType()) {
-
-                synchronized (mSensorSnapshots) {
-                    if (!mSensorSnapshots.containsKey(updated.id)) {
-                        setupNewSensor(updated);
-                    } else {
-                        sensorUpdated(updated);
-                    }
-                    mSensorSnapshots.put(updated.id, updated);
-                }
             }
         }
     }
 
-    protected void setupNewSensor(SensorModel sensor) {}
+    /**
+     * Called when the Manager is notified that the sensor has been updated.
+     * @param sensor
+     */
     protected void sensorUpdated(SensorModel sensor) {}
 
     protected abstract SensorModel.SensorType getSensorType();
 
-    protected void receivedNewSensorData(SensorModel sensor, SensorDataModel freshData) {
+    protected void receivedDataFromSensor(SensorModel sensor, SensorDataModel freshData) {
         publishNewSensorData(sensor, freshData);
     }
 

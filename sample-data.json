@@ -3,6 +3,7 @@
     "device1": {
       "name": "device1",
       "location": "LivingRoom",
+      "logLevel": 5000,
       "sensorIDs": [
         "temp1",
         "humidity1"

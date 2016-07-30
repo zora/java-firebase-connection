@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Starting application...");
-        FirebaseBridge firebaseBridge = new FirebaseBridge();
+        FirebaseBridge firebaseBridge = new FirebaseBridge("device1");
         firebaseBridge.initialize();
 
         Log.initialize(firebaseBridge);
