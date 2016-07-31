@@ -14,6 +14,6 @@ calchum = round(calchum, 2)
 msg = "%s" % (calctemp)
 error = "";
 
-data = json.dumps({'error': error, 'rawTemp': rawtemp, 'calcTemp': calctemp});
+data = json.dumps({'error': error, 'value': rawtemp});
     
 print(data) 
