@@ -15,11 +15,8 @@ import java.util.*;
 public class FirebaseBridge {
     private String mDeviceID;
 
-
-
     // Device Snapshots
     private final Snapshot<DeviceModel> mDeviceSnapshot = new Snapshot<>(null);
-    private final Snapshot<DeviceStatisticsModel> mDeviceStatisticsSnapshot = new Snapshot<>(null);
     private final Map<String, Snapshot<SensorModel>> mSensorSnapshots = new HashMap<>();
 
     private Set<String> mSensorsTracked;
@@ -30,11 +27,11 @@ public class FirebaseBridge {
     private DatabaseReference mDeviceRef;
     private DatabaseReference mSensorsRef;
     private DatabaseReference mSensorDataRef;
-    private DatabaseReference mDeviceStatisticsRef;
     private DatabaseReference mDeviceLogsRef;
 
     public class Snapshot<T> extends Observable {
         private T snapshot;
+
         public Snapshot(T snapshot) {
             this.snapshot = snapshot;
         }
@@ -76,7 +73,6 @@ public class FirebaseBridge {
         mSensorsRef = FirebaseDatabase.getInstance().getReference("sensors");
         mSensorDataRef = FirebaseDatabase.getInstance().getReference("sensorData");
         mDeviceLogsRef = FirebaseDatabase.getInstance().getReference("logs").child(mDeviceID);
-        mDeviceStatisticsRef = FirebaseDatabase.getInstance().getReference("deviceStatistics").child(mDeviceID);
     }
 
     private void setupDevice() {
@@ -97,8 +93,8 @@ public class FirebaseBridge {
                         }
 
                         // Check for Removed sensors.
-                        for(String sensorID : mSensorsTracked) {
-                            if(!device.sensorIDs.contains(sensorID)) {
+                        for (String sensorID : mSensorsTracked) {
+                            if (!device.sensorIDs.contains(sensorID)) {
                                 mSensorsTracked.remove(sensorID);
                                 removeSensor(sensorID);
                             }
@@ -124,12 +120,12 @@ public class FirebaseBridge {
                     SensorModel model = dataSnapshot.getValue(SensorModel.class);
                     if (model != null) {
                         Snapshot<SensorModel> sensorSnapshot = mSensorSnapshots.get(sensorID);
-                        if(sensorSnapshot != null) {
+                        if (sensorSnapshot != null) {
                             sensorSnapshot.setSnapshot(model);
                         } else {
                             sensorSnapshot = new Snapshot<>(model);
                             mSensorSnapshots.put(sensorID, sensorSnapshot);
-                            for(SensorChangeListener listener : mSensorListeners) {
+                            for (SensorChangeListener listener : mSensorListeners) {
                                 listener.onSensorAdded(sensorSnapshot);
                             }
                         }
@@ -148,14 +144,14 @@ public class FirebaseBridge {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // New Sensor Data event received from sensorID.
-                if(dataSnapshot == null) {
+                if (dataSnapshot == null) {
                     return;
                 }
 
                 SensorEventModel event = dataSnapshot.getValue(SensorEventModel.class);
                 Set<SensorEventListener> interestedListeners = mSensorEventListeners.get(sensorID);
-                if(event != null && interestedListeners != null && !interestedListeners.isEmpty()) {
-                    for(SensorEventListener listener : interestedListeners) {
+                if (event != null && interestedListeners != null && !interestedListeners.isEmpty()) {
+                    for (SensorEventListener listener : interestedListeners) {
                         listener.onSensorEventReceived(sensorID, event);
                     }
                 }
@@ -185,22 +181,23 @@ public class FirebaseBridge {
 
     private void removeSensor(String sensorID) {
         Snapshot<SensorModel> sensor = mSensorSnapshots.get(sensorID);
-        if(sensor != null && sensor.getSnapshot() != null) {
+        if (sensor != null && sensor.getSnapshot() != null) {
             sensor.setSnapshot(null);
         }
 
-        if(sensor != null) {
+        if (sensor != null) {
             sensor.deleteObservers();
         }
 
         mSensorSnapshots.remove(sensorID);
-        for(SensorChangeListener listener : mSensorListeners) {
+        for (SensorChangeListener listener : mSensorListeners) {
             listener.onSensorRemoved(sensorID);
         }
     }
 
     public interface SensorChangeListener {
         void onSensorAdded(Snapshot<SensorModel> sensorSnapshot);
+
         void onSensorRemoved(String sensorID);
     }
 
@@ -217,7 +214,7 @@ public class FirebaseBridge {
     }
 
     public void addSensorEventListener(String sensorID, SensorEventListener listener) {
-        if(!mSensorEventListeners.containsKey(sensorID)) {
+        if (!mSensorEventListeners.containsKey(sensorID)) {
             mSensorEventListeners.put(sensorID, new HashSet<>());
         }
 
@@ -225,7 +222,7 @@ public class FirebaseBridge {
     }
 
     public void removeSensorEventListener(String sensorID, SensorEventListener listener) {
-        if(mSensorEventListeners.containsKey(sensorID)) {
+        if (mSensorEventListeners.containsKey(sensorID)) {
             mSensorEventListeners.get(sensorID).remove(listener);
         }
     }

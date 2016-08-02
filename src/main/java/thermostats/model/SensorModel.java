@@ -11,15 +11,11 @@ public class SensorModel implements Serializable {
     public boolean active;
 
     public enum SensorType {
-        temperature, humidity
+        temperature, humidity, cpuUsage, memoryUsage, diskUsage
     }
 
     @Override
     public String toString() {
-        return "SensorModel{" +
-                "id='" + id + '\'' +
-                ", type=" + type +
-                ", active=" + active +
-                '}';
+        return String.format("(id: %s, type: %s, active: %b)", id, type, active);
     }
 }

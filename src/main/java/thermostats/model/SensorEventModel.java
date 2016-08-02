@@ -1,6 +1,7 @@
 package thermostats.model;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -18,6 +19,6 @@ public class SensorEventModel implements Serializable{
 
     @Override
     public String toString() {
-        return "[SensorEvent - Time: " + new Date(timestamp) + " Value:" + value + "]";
+        return String.format("(Time: %tF, Value:%.2f)", new Date(timestamp), value);
     }
 }

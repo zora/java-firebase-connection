@@ -33,8 +33,8 @@ public class Log {
     }
 
     private static FirebaseBridge mBridge;
-    private static LogLevel mLogLevel = LogLevel.DEBUG;
-    public static final String DEFAULT_TAG = "main";
+    private static LogLevel mLogLevel = LogLevel.INFO;
+    private static LogLevel mLocalLogLevel = LogLevel.DEBUG;
 
     public static void initialize(FirebaseBridge bridge) {
         mBridge = bridge;
@@ -66,8 +66,14 @@ public class Log {
 
     private static void log(LogLevel level, String tag, String message) {
         if (mBridge != null && tag != null && !tag.isEmpty() && message != null && !message.isEmpty()) {
-            System.out.println(level.name() + ": " + tag + " - " + message);
-            mBridge.publishLogCall(tag, new LogEventModel(System.currentTimeMillis(), level.value, message));
+            if(mLogLevel.value <= level.value) {
+                mBridge.publishLogCall(tag, new LogEventModel(System.currentTimeMillis(), level.value, message));
+            }
+
+            if(mLocalLogLevel.value <= level.value) {
+                System.out.println(level.name() + ": " + tag + " - " + message);
+            }
+
         }
     }
 }

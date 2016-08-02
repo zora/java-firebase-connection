@@ -6,15 +6,11 @@
       "logLevel": 5000,
       "sensorIDs": [
         "temp1",
-        "humidity1"
+        "humidity1",
+        "cpuUsage1",
+        "memory1",
+        "disk1"
       ]
-    }
-  },
-  "deviceStatistics": {
-    "device1": {
-      "cpuUsage": "50%",
-      "memoryUsage": "20%",
-      "uptime": "12d"
     }
   },
   "sensors": {
@@ -27,12 +23,27 @@
       "id": "humidity1",
       "type": "humidity",
       "active": true
+    },
+    "cpuUsage1": {
+      "id": "cpuUsage1",
+      "type": "cpuUsage",
+      "active": true
+    },
+    "memory1": {
+      "id": "memory1",
+      "type": "memoryUsage",
+      "active": true
+    },
+    "disk1": {
+      "id": "disk1",
+      "type": "diskUsage",
+      "active": true
     }
   },
   "logs": {
     "device1": {
       "dfgkl": {
-        "timestamp": 1468863957,
+        "timestamp": 1469899740421,
         "level": 5,
         "data": "Log Started for Device1"
       }
@@ -41,14 +52,20 @@
   "sensorData": {
     "temp1": {
       "asdkf": {
-        "timestamp": 1468863957,
+        "timestamp": 1469899740421,
         "value": 20.50
       }
     },
     "humidity1": {
       "askd": {
-        "timestamp": 1468863957,
+        "timestamp": 1469899740421,
         "value": 50.02
+      }
+    },
+    "cpuUsage1": {
+      "asdk": {
+        "timestamp": 1469899740421,
+        "value": 5.0
       }
     }
   }
