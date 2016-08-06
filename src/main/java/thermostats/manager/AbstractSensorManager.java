@@ -13,6 +13,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,18 +22,19 @@ import java.util.concurrent.TimeUnit;
 public abstract class AbstractSensorManager implements Observer, FirebaseBridge.SensorEventListener {
 
     private static final String TAG = "sensor";
-    private static final long INIT_DELAY = 2000;
-    private static final long POLL_PERIOD = 15000;
+    private static final long INIT_DELAY = 2;
 
     private FirebaseBridge mFirebaseBridge;
     private IOBridge mIOBridge;
     private final Map<String, SensorModel> mManagedSensors;
-    private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(1);
+    private final Map<String, ScheduledFuture> mPendingResults;
+    private final ScheduledExecutorService mScheduler = Executors.newScheduledThreadPool(2);
 
     public AbstractSensorManager(FirebaseBridge firebaseBridge, IOBridge ioBridge) {
         mFirebaseBridge = firebaseBridge;
         mIOBridge = ioBridge;
         mManagedSensors = new HashMap<>();
+        mPendingResults = new HashMap<>();
     }
 
     public void initialize() {
@@ -56,28 +58,14 @@ public abstract class AbstractSensorManager implements Observer, FirebaseBridge.
             @Override
             public void onSensorRemoved(String sensorID) {
                 mManagedSensors.remove(sensorID);
+                sensorRemoved(sensorID);
             }
         });
-
-        mScheduler.scheduleAtFixedRate(() -> {
-            synchronized (mManagedSensors) {
-                for (SensorModel model : mManagedSensors.values()) {
-                    if (model.active) {
-                        SensorDataModel freshData = mIOBridge.getSensorData(model);
-                        if (freshData != null && freshData.isValid()) {
-                            receivedDataFromSensor(model, freshData);
-                        } else {
-                            // TODO: Add error log for invalid sensor data.
-                        }
-                    }
-                }
-            }
-        }, INIT_DELAY, POLL_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void onSensorEventReceived(String sensorID, SensorEventModel sensorEvent) {
-        Log.d(TAG, String.format("%s received sensor event: %s",sensorID, sensorEvent));
+        Log.d(TAG, String.format("%s received sensor event: %s", sensorID, sensorEvent));
     }
 
     @Override
@@ -96,7 +84,33 @@ public abstract class AbstractSensorManager implements Observer, FirebaseBridge.
      * @param sensor
      */
     protected void sensorUpdated(SensorModel sensor) {
-        // TODO: Verify sensor after update.
+        synchronized (mPendingResults) {
+            ScheduledFuture previousSchedule = mPendingResults.get(sensor.id);
+            if (previousSchedule != null) {
+                Log.d(TAG, "Resetting schedule for updated Sensor: " + sensor.id);
+                previousSchedule.cancel(false);
+                mPendingResults.remove(sensor.id);
+            }
+
+            ScheduledFuture pendingResult = mScheduler.scheduleAtFixedRate(() -> {
+                if (sensor.active) {
+                    SensorDataModel freshData = mIOBridge.getSensorData(sensor);
+                    if (freshData != null && freshData.isValid()) {
+                        receivedDataFromSensor(sensor, freshData);
+                    } else {
+                        Log.e(TAG, String.format("Sensor %s recieved invalid data: %s", sensor.id, freshData));
+                    }
+                }
+            }, INIT_DELAY, sensor.updateInterval, TimeUnit.SECONDS);
+
+            mPendingResults.put(sensor.id, pendingResult);
+        }
+    }
+
+    protected void sensorRemoved(String sensorID) {
+        if (mPendingResults.containsKey(sensorID)) {
+            mPendingResults.get(sensorID).cancel(false);
+        }
     }
 
     protected abstract SensorModel.SensorType getSensorType();
