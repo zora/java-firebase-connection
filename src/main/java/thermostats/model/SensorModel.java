@@ -8,6 +8,7 @@ import java.io.Serializable;
 public class SensorModel implements Serializable {
     public String id;
     public SensorType type;
+    public int updateInterval;
     public boolean active;
 
     public enum SensorType {
